@@ -6,41 +6,28 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
 
-    private Slider powerBar;
-    private TMP_Text scoreText;
-    private TMP_Text timerText;
+    [Header("Canvases")]
+    public Canvas gameplayCanvas;
+    public Canvas menuCanvas;
 
-    private Canvas gameplayCanvas;
-    private Canvas menuCanvas;
+    [Header("Gameplay UI")]
+    public Slider powerBar;
+    public TMP_Text scoreText;
+    public TMP_Text timerText;
 
     void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
-        gameplayCanvas = GameObject.Find("GamePlayUI")?.GetComponent<Canvas>();
-        menuCanvas = GameObject.Find("MenuUI")?.GetComponent<Canvas>();
-
-        if (menuCanvas == null || gameplayCanvas == null)
+        if (gameplayCanvas == null || menuCanvas == null)
         {
-            Debug.LogWarning("GameplayCanvas ou nemuCanavas pas trouvé");
+            Debug.LogError("Les canvases ne sont pas assignés dans l'inspecteur !");
         }
-        if (gameplayCanvas != null)
-        {
-            Transform root = gameplayCanvas.transform;
 
-            powerBar = root.Find("PowerBar")?.GetComponent<Slider>();
-            scoreText = root.Find("ScoreText")?.GetComponent<TMP_Text>();
-            timerText = root.Find("TimerText")?.GetComponent<TMP_Text>();
-
-            if (powerBar == null || scoreText == null || timerText == null)
-            {
-                Debug.LogWarning("Un ou plusieurs éléments UI sont introuvables dans GameplayUI.");
-            }
-        }
-        else
+        if (powerBar == null || scoreText == null || timerText == null)
         {
-            Debug.LogError("GameplayUI introuvable.");
+            Debug.LogError("Les éléments de l'interface ne sont pas assignés dans l'inspecteur !");
         }
 
         gameplayCanvas.enabled = false;
@@ -50,25 +37,19 @@ public class UIManager : MonoBehaviour
     public void SetPower(float value)
     {
         if (powerBar != null)
-        {
             powerBar.value = value;
-        }
     }
 
     public void ShowPowerBar(bool visible)
     {
         if (powerBar != null)
-        {
             powerBar.gameObject.SetActive(visible);
-        }
     }
 
     public void SetScore(int score)
     {
         if (scoreText != null)
-        {
             scoreText.text = "Score : " + score;
-        }
     }
 
     public void SetTimer(float time)
@@ -83,8 +64,8 @@ public class UIManager : MonoBehaviour
 
     public void SwitchToGameplay()
     {
-        menuCanvas.enabled = false;
-        gameplayCanvas.enabled = true;
+        if (menuCanvas != null) menuCanvas.enabled = false;
+        if (gameplayCanvas != null) gameplayCanvas.enabled = true;
 
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;

@@ -7,53 +7,65 @@ public class Ball : MonoBehaviour
     private bool isPossessed = false;
     private Transform followTarget;
 
+    [Tooltip("Frottement lorsque la balle est libre")]
     public float stopDrag = 1f;
+
+    [Tooltip("Frottement lorsque la balle est possédée")]
     public float possessionDrag = 5f;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
     }
+    private bool recentlyDetached = false;
 
     void FixedUpdate()
     {
-        if (!isPossessed)
+        if (recentlyDetached)
         {
-            rb.drag = stopDrag;
+            recentlyDetached = false;
+            return;
         }
-        else if (followTarget != null)
+
+        if (isPossessed && followTarget != null)
         {
             rb.drag = possessionDrag;
 
-            Vector3 targetPosition = followTarget.position;
-            Vector3 currentPosition = transform.position;
+            Vector3 targetPos = followTarget.position;
+            Vector3 pos = transform.position;
 
             Vector3 direction = new Vector3(
-                targetPosition.x - currentPosition.x,
+                targetPos.x - pos.x,
                 0f,
-                targetPosition.z - currentPosition.z
+                targetPos.z - pos.z
             );
 
-            rb.velocity = new Vector3(
-                direction.x / Time.fixedDeltaTime,
-                rb.velocity.y, 
-                direction.z / Time.fixedDeltaTime
-            );
-
+            rb.velocity = direction / Time.fixedDeltaTime;
+        }
+        else
+        {
+            rb.drag = stopDrag;
         }
     }
 
-    public void Possess(Transform player, Transform holdPoint)
+    public void Detach()
+    {
+        isPossessed = false;
+        followTarget = null;
+        recentlyDetached = true;
+    }
+
+    public void Possess(Transform target)
     {
         isPossessed = true;
-        followTarget = holdPoint;
+        followTarget = target;
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
     }
 
-    public void DetachFromPlayer()
-    {
-        isPossessed = false;
-        followTarget = null;
-    }
+    //public void Detach()
+    //{
+    //    isPossessed = false;
+    //    followTarget = null;
+    //}
 }

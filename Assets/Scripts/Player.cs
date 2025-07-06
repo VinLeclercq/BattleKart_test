@@ -1,6 +1,3 @@
-// =========================
-// Player.cs
-// =========================
 using UnityEngine;
 using System.Collections;
 
@@ -8,36 +5,37 @@ public class Player : MonoBehaviour
 {
     public GameObject ballObject;
     private Ball ball;
-    private float ballRadius;
-
-    public bool hasBall = false;
     private Transform ballHoldPoint;
 
+    [Header("Possession")]
+    public bool hasBall = false;
+    private bool canRepossess = true;
+
+    [Header("Tir & Passe")]
     private float currentPower = 0f;
     public float maxPower = 1f;
     public float chargeSpeed = 1f;
-    public float shootForce = 10f;
+
+    [Tooltip("Force maximale du tir")]
+    public float shootForce = 2f;
+
+    [Tooltip("Force de la passe")]
     public float passForce = 5f;
 
-    private float lastActionTime = 0f;
+    [Header("Cooldowns")]
     public float actionCooldown = 0.5f;
+    private float lastActionTime = 0f;
+    public float possessionDelay = 1f;
 
     void Start()
     {
         if (ballObject == null)
-        {
             ballObject = GameObject.FindWithTag("Ball");
-        }
 
         if (ballObject != null)
-        {
             ball = ballObject.GetComponent<Ball>();
-            ballRadius = ballObject.GetComponent<SphereCollider>().radius;
-        }
         else
-        {
-            Debug.LogWarning("No Ball found in the scene.");
-        }
+            Debug.LogWarning("Ball not found!");
 
         ballHoldPoint = new GameObject("BallHoldPoint").transform;
         ballHoldPoint.SetParent(transform);
@@ -46,20 +44,14 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if (hasBall && ball != null)
+        if (!hasBall && canRepossess && ball != null)
         {
-            ball.Possess(transform, ballHoldPoint);
+            float dist = Vector3.Distance(ball.transform.position, transform.position);
+            if (dist < 1.2f)
+                PossessBall();
         }
 
-        if (!hasBall && ball != null)
-        {
-            float distanceToBall = Vector3.Distance(ball.transform.position, transform.position);
-            if (distanceToBall < 1.2f)
-            {
-                hasBall = true;
-            }
-        }
-
+        // Chargement du tir
         if (hasBall && Input.GetMouseButton(0))
         {
             currentPower += Time.deltaTime * chargeSpeed;
@@ -68,55 +60,64 @@ public class Player : MonoBehaviour
             UIManager.Instance.SetPower(currentPower);
         }
 
+        // Tir
         if (hasBall && Input.GetMouseButtonUp(0))
         {
-            Shoot(currentPower);
+            StartCoroutine(Shoot(currentPower));
             currentPower = 0f;
             UIManager.Instance.SetPower(0f);
             UIManager.Instance.ShowPowerBar(false);
         }
 
+        // Passe
         if (hasBall && Input.GetMouseButtonDown(1))
         {
-            Pass();
+            StartCoroutine(Pass());
         }
     }
 
-    void Shoot(float power)
+    void PossessBall()
     {
-        if (Time.time - lastActionTime < actionCooldown || ball == null) return;
-        StartCoroutine(ShootAfterDetach(power));
+        hasBall = true;
+        ball.Possess(ballHoldPoint);
     }
 
-    IEnumerator ShootAfterDetach(float power)
+    IEnumerator Shoot(float power)
     {
-        ball.DetachFromPlayer();
+        if (Time.time - lastActionTime < actionCooldown) yield break;
         hasBall = false;
-        yield return new WaitForFixedUpdate(); // attendre une frame physique
-
+        canRepossess = false;
+        ball.Detach();
+        yield return new WaitForFixedUpdate();
+        yield return null;
         Rigidbody rb = ball.GetComponent<Rigidbody>();
-        rb.AddForce(transform.forward * power * shootForce, ForceMode.Impulse);
-
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        Vector3 shootDirection = transform.forward + Vector3.up * 0.3f;
+        float forceMagnitude = power * shootForce;
+        Debug.Log("Shoot force magnitude: " + forceMagnitude);
+        rb.AddForce(shootDirection.normalized * forceMagnitude, ForceMode.Impulse);
         lastActionTime = Time.time;
+        yield return new WaitForSeconds(possessionDelay);
+        canRepossess = true;
     }
 
-    void Pass()
+    IEnumerator Pass()
     {
-        if (Time.time - lastActionTime < actionCooldown || ball == null) return;
-        StartCoroutine(PassAfterDetach());
-    }
-
-    IEnumerator PassAfterDetach()
-    {
-        ball.DetachFromPlayer();
+        if (Time.time - lastActionTime < actionCooldown) yield break;
         hasBall = false;
-        yield return new WaitForFixedUpdate(); // attendre une frame physique
-
+        canRepossess = false;
+        ball.Detach();
+        yield return new WaitForFixedUpdate();
         Rigidbody rb = ball.GetComponent<Rigidbody>();
-        rb.AddForce(transform.forward * passForce, ForceMode.Impulse);
-
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        float forceMagnitude = passForce;
+        Debug.Log("Pass force magnitude: " + forceMagnitude);
+        rb.AddForce(transform.forward * forceMagnitude, ForceMode.Impulse);
         lastActionTime = Time.time;
+        yield return new WaitForSeconds(possessionDelay);
+        canRepossess = true;
     }
-
-
 }
+

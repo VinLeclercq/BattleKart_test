@@ -2,12 +2,19 @@ using UnityEngine;
 
 public class GoalZone : MonoBehaviour
 {
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Ball"))
         {
-            GameManager.Instance.AddGoal();
-            Debug.Log("But !");
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddGoal();
+                Debug.Log("But !");
+            }
+            else
+            {
+                Debug.LogError("GameManager.Instance est null !");
+            }
         }
     }
 }
