@@ -401,7 +401,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7544785371737429491}
-  - component: {fileID: 1331909349614334458}
   m_Layer: 0
   m_Name: goal_sensor
   m_TagString: Untagged
@@ -424,14 +423,6 @@ Transform:
   m_Father: {fileID: 1846552357594149510}
   m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &1331909349614334458
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 628779554189438596}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &656043188775950860
 GameObject:
   m_ObjectHideFlags: 0
@@ -1026,7 +1017,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8697403701391986844}
-  - component: {fileID: 6453475924714449038}
   m_Layer: 0
   m_Name: goal_sensor (1)
   m_TagString: Untagged
@@ -1049,14 +1039,6 @@ Transform:
   m_Father: {fileID: 1846552357594149510}
   m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &6453475924714449038
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2360479709937405713}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &2643937568209536771
 GameObject:
   m_ObjectHideFlags: 0
